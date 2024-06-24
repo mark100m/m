@@ -108,28 +108,36 @@
 <script>
 function calculateTotal() {
     const price = parseFloat(document.getElementById('price').value);
-        const area = parseFloat(document.getElementById('area').value);
-        const startDate = new Date(document.getElementById('startDate').value);
-        const endDate = new Date(document.getElementById('endDate').value);
-    
-        let totalCost = 0;
-        let currentDate = new Date(startDate);
-    
-        while (currentDate <= endDate) {
-            const nextMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
-            
-            if (nextMonthDate > endDate) {
-                const daysInLastMonth = endDate.getDate();
-                totalCost += ((price / daysInMonth(currentDate)) * daysInLastMonth) * area;
-                break;
-            } else {
-                totalCost += price * area;
-            }
-            
-            currentDate.setMonth(currentDate.getMonth() + 1);
-        }
-    
-        document.getElementById('totalCost').innerText = totalCost.toFixed(2);
+    const area = parseFloat(document.getElementById('area').value);
+    const startDate = new Date(document.getElementById('startDate').value);
+    const endDate = new Date(document.getElementById('endDate').value);
+
+    let totalCost = 0;
+    let currentDate = new Date(startDate);
+
+    // 首先处理起始日期所在的那个月份
+    const startMonthDays = daysInMonth(startDate);
+    const daysInFirstMonth = startDate.getDate();
+    totalCost += ((price / startMonthDays) * daysInFirstMonth) * area;
+
+    currentDate.setMonth(currentDate.getMonth() + 1); // 进入下一个月份
+    currentDate.setDate(1); // 设定为下个月的1号
+
+    // 处理整月部分
+    while (currentDate < endDate) {
+        totalCost += price * area;
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        currentDate.setDate(1);
+    }
+
+    // 最后处理结束月份的非整月部分
+    if (currentDate.getMonth() === endDate.getMonth() && currentDate.getFullYear() === endDate.getFullYear()) {
+        const endMonthDays = daysInMonth(endDate);
+        const remainingDays = endDate.getDate();
+        totalCost += ((price / endMonthDays) * remainingDays) * area;
+    }
+
+    document.getElementById('totalCost').innerText = totalCost.toFixed(2);
 }
 
 function copyToClipboard() {
